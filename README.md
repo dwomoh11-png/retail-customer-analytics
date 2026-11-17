@@ -1,79 +1,152 @@
 # Retail Customer Analytics
 
 **Author:** Benjamin Dwomoh  
-**Context:** MSc Data Analytics coursework, reviewed for a public portfolio  
-**Tools:** Python, pandas, NumPy, Matplotlib, seaborn, scikit-learn
+**Portfolio context:** Developed from MSc Data Analytics coursework and revised for reproducibility, clearer interpretation and responsible model reporting.
+**Tools:** Python, pandas, NumPy, Matplotlib, seaborn and scikit-learn
 
-## Analytical question
+## Project overview
 
-How do completed-purchase revenue and customer purchasing behaviour vary, and what segments might inform marketing hypotheses?
+This project analyses 541,909 transactions from a UK-based online retailer to understand completed-purchase revenue, historical customer value and purchasing behaviour. It combines transaction cleaning, RFM-style feature engineering, supervised machine learning and customer segmentation to identify patterns that can inform testable marketing and retention hypotheses.
 
-## Data and my contribution
+## Business questions
 
-541,909 source transaction rows; UK-based online retail data from December 2010 to December 2011. Supplied for my MSc assignment. I worked on data preparation, analysis, modelling and interpretation; I did not collect the original dataset.
+1. How does completed-purchase revenue vary over time, by product and by country?
+2. Which historical customer characteristics are associated with monetary value?
+3. Can customers be grouped into interpretable segments for differentiated marketing tests?
+4. How accurately can historical value tiers be reconstructed from customer behaviour features?
 
-## Approach
+## Dataset and contribution
 
-Data auditing and purchase-only cleaning; historical RFM features; descriptive revenue charts; Linear Regression and Random Forest; Logistic Regression for value tiers; K-means with silhouette comparison and PCA visualisation.
+The source contains **541,909 transaction rows** from December 2010 to December 2011. I prepared the data, engineered customer-level features, conducted the analysis, developed the models and interpreted the results. I did not collect the original dataset.
 
-## Results
+Purchase-only cleaning removed duplicate records, missing customer identifiers, cancellations and non-positive purchases. The resulting analysis dataset contained **392,692 transactions** representing **4,338 customers**.
 
-- Purchase-only cleaning retained **392,692 transaction rows** representing **4,338 customers**.
-- RFM clustering selected **2 clusters**, with a silhouette score of **0.433**. The groups differed in median recency (96 versus 16 days), frequency (1 versus 6 invoices) and monetary value (GBP 363 versus GBP 2,061).
-- Logistic Regression achieved **79.49% accuracy** when classifying historical low, medium and high value tiers.
-- Random Forest achieved **R-squared 0.949** on log historical monetary value in the 80/20 split, compared with **0.521** for Linear Regression. This is same-period reconstruction and must not be described as future-value forecasting.
-- The UK dominated revenue. Use the segments to form campaign hypotheses, then validate interventions with new outcome data.
+## Analytical workflow
 
-## Example chart
+1. Audit and clean transaction data.
+2. Create customer-level recency, frequency, monetary and behavioural features.
+3. Explore revenue patterns across time, products and countries.
+4. Compare Linear Regression and Random Forest for historical monetary-value reconstruction.
+5. Use Logistic Regression to classify historical customer-value tiers.
+6. Compare K-means solutions using inertia and silhouette scores.
+7. Profile the selected customer segments and translate the findings into testable business hypotheses.
 
-![Selected analysis chart](figures/figure-04.png)
+## Key results
+
+### Model comparison
+
+| Analytical task | Model | Evaluation result |
+|---|---|---:|
+| Historical value reconstruction | Linear Regression, 80/20 split | R-squared = 0.521 |
+| Historical value reconstruction | Random Forest, 80/20 split | R-squared = 0.949 |
+| Historical value-tier classification | Logistic Regression | Accuracy = 79.49% |
+| Customer segmentation | K-means, k = 2 | Silhouette score = 0.433 |
+
+The regression metrics were calculated on `log(1 + historical monetary value)`. These results measure same-period historical reconstruction and must not be interpreted as future-spending or customer-lifetime-value forecasts.
+
+### Customer segments
+
+K-means selected two clusters after comparing values of `k` from 2 to 8. The business-friendly names below are interpretive labels based on the cluster profiles; they are not observed customer categories.
+
+| Segment | Customers | Median recency | Median frequency | Median monetary value | Interpretation |
+|---|---:|---:|---:|---:|---|
+| Occasional or At-Risk Customers | 2,672 | 96 days | 1 invoice | GBP 363.08 | Less recent, infrequent customers who may be suitable for carefully tested re-engagement activity |
+| Active High-Value Customers | 1,666 | 16 days | 6 invoices | GBP 2,061.08 | Recent, repeat customers who may be suitable for retention and loyalty tests |
+
+![Customer segments in PCA space](figures/figure-04.png)
+
+### Selected visual results
+
+#### Monthly completed-purchase revenue
+
+![Monthly completed-purchase revenue](figures/figure-05.png)
+
+December 2011 is incomplete and should not be compared directly with complete months.
+
+#### Historical value-tier classification
+
+![Customer value classification confusion matrix](figures/figure-02.png)
+
+#### Historical monetary-value reconstruction
+
+![Actual versus predicted log monetary value](figures/figure-01.png)
+
+## Business insights and recommendations
+
+- **Retention hypothesis:** Active High-Value Customers purchased more recently and frequently and had substantially higher historical spending. Test whether loyalty benefits, early access or personalised offers improve repeat purchasing in this group.
+- **Re-engagement hypothesis:** Occasional or At-Risk Customers had a median recency of 96 days and only one historical invoice. Test a reactivation campaign against a suitable control group before making broad claims about its effectiveness.
+- **Geographic analysis:** The United Kingdom dominates revenue, so aggregate international comparisons can obscure smaller markets. Analyse major non-UK markets separately before creating country-specific strategies.
+- **Product planning:** Use the highest-revenue products as candidates for merchandising and cross-selling analysis, but evaluate units sold, margins and returns before drawing profitability conclusions.
+- **Measurement:** Treat the segments as targeting hypotheses rather than proven marketing solutions. Measure campaign lift, conversion, incremental revenue and retention using new outcome data.
+
+## Visualisation notes
+
+- The sharp December 2011 decline reflects an incomplete month rather than confirmed business deterioration.
+- The United Kingdom dominates the country chart. A follow-up analysis should compare non-UK markets separately or use a transformed scale.
+- PCA is used only to visualise the K-means solution in two dimensions; clustering was performed on the standardised log-transformed RFM features.
 
 ## Limitations
 
-Supervised models use features and monetary targets from the same historical window. Results describe historical value reconstruction, not future spending or customer lifetime value. Tier thresholds are calculated on the full descriptive sample. A forecasting extension requires a time-based split and separate observation and outcome windows. Cancellations and non-positive purchases are excluded, so revenue is not net of returns. December 2011 is incomplete. Segment recommendations are hypotheses rather than tested marketing effects.
+- Supervised models use behavioural features and monetary targets from the same historical window. They reconstruct historical value rather than forecast future spending.
+- Historical value tiers are defined using quantiles from the complete descriptive sample. A production workflow should derive and freeze tier thresholds using training data only.
+- Cancellations and non-positive purchases are excluded, so the analysis reports completed-purchase revenue rather than net revenue after returns.
+- December 2011 is incomplete.
+- Missing customer identifiers reduce customer-level coverage.
+- The two clusters are descriptive groups, and the silhouette score does not establish commercial usefulness.
+- Recommendations are testable hypotheses; no causal campaign effect was evaluated.
 
 ## Run the analysis
 
-Use Python 3.11 or newer. From this repository folder:
+Use Python 3.11 or newer. From the repository folder, create and activate a virtual environment.
 
 ```bash
 python -m venv .venv
 ```
 
-Activate the environment on Windows PowerShell:
+Windows PowerShell:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Or on macOS/Linux:
+macOS/Linux:
 
 ```bash
 source .venv/bin/activate
 ```
 
-Then install the packages and start Jupyter:
+Install the packages and start Jupyter:
 
 ```bash
 python -m pip install -r requirements.txt
 python -m jupyter lab
 ```
 
-Place the source dataset in `data/` as described in [data/README.md](data/README.md). Open [analysis.ipynb](analysis.ipynb), then restart the kernel and run all cells. The notebook includes saved outputs for readers who only want to inspect the work.
+Place the source dataset in `data/` as described in [data/README.md](data/README.md). Open [analysis.ipynb](analysis.ipynb), restart the kernel and run all cells. Saved outputs are included for readers who only want to inspect the work.
 
-Core analysis package versions are pinned to the validation environment. JupyterLab is a frontend dependency; it was not available in the validation environment. Validation executed Python cells sequentially with a lightweight runner and captured tables and Matplotlib outputs rather than using a Jupyter kernel.
+## Repository structure
 
+```text
+retail-customer-analytics/
+├── analysis.ipynb       # Explained analysis with executed outputs
+├── figures/             # Exported analysis charts
+├── data/README.md       # Dataset source and placement instructions
+├── requirements.txt     # Analysis dependencies
+├── VALIDATION.md        # Execution and scope checks
+├── LICENSE              # Licence for the original project code
+└── README.md            # Project overview and findings
+```
 
-## Files
+## Validation
 
-- `analysis.ipynb`: explained analysis with executed outputs.
-- `figures/`: saved charts produced by the notebook.
-- `requirements.txt`: analysis dependencies.
-- `data/README.md`: dataset source and placement instructions.
-- `VALIDATION.md`: execution checks and scope.
+The analytical workflow underlying the saved results was executed sequentially against the original dataset without errors. A later presentation-only cleanup consolidated duplicate imports without changing the analytical logic or saved results. See [VALIDATION.md](VALIDATION.md) for the validation scope and environment details.
 
-## Source
+## Data source
 
-Chen, D. (2015). Online Retail. UCI Machine Learning Repository. https://doi.org/10.24432/C5BW33. UCI lists the dataset under CC BY 4.0.
+Chen, D. (2015). *Online Retail*. UCI Machine Learning Repository.
+
+https://doi.org/10.24432/C5BW33
 
 https://archive.ics.uci.edu/dataset/352/online+retail
+
+UCI lists the dataset under the CC BY 4.0 licence. The repository does not redistribute the raw dataset.
